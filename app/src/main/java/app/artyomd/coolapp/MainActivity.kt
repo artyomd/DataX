@@ -47,12 +47,12 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         buildLocationSettingsRequest()
     }
 
-    private fun openComponent(component: Component) {
+    private fun openComponent(component: Component, path: String?) {
         currentFragment =
                 when (component) {
                     Component.MAP -> MapsFragment()
                     Component.CAMERA -> CameraFragment()
-                    Component.SHARE -> ShareFragment()
+                    Component.SHARE -> ShareFragment.newInstance(path!!, mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
                 }
         currentFragment!!.retainInstance = true
         val transaction = supportFragmentManager.beginTransaction()
@@ -61,11 +61,11 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
     }
 
     override fun openCamera() {
-        openComponent(Component.CAMERA)
+        openComponent(Component.CAMERA, null)
     }
 
     override fun openShare(path: String) {
-        openComponent(Component.SHARE)
+        openComponent(Component.SHARE, path)
     }
 
     private var mFusedLocationClient: FusedLocationProviderClient? = null
@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         if (mRequestingLocationUpdates!! && checkPermissions()) {
             startLocationUpdates()
             if (currentFragment == null) {
-                openComponent(Component.MAP)
+                openComponent(Component.MAP, null)
             }
         } else if (!checkPermissions()) {
             requestPermissions()

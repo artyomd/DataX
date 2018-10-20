@@ -1,5 +1,6 @@
 package app.artyomd.coolapp.api;
 
+import app.artyomd.coolapp.db.DisasterMetadata;
 import com.google.gson.*;
 import okhttp3.*;
 
@@ -24,20 +25,23 @@ public class ReliefService {
                     JsonParser parser = new JsonParser();
                     JsonElement object = parser.parse(response.body().string());
                     JsonArray data = object.getAsJsonObject().get("data").getAsJsonArray();
-                    List<ReliefData> dataSet = new ArrayList<>();
+                    List<DisasterMetadata> dataSet = new ArrayList<>();
                     for(JsonElement element:data){
                         JsonObject fields = element.getAsJsonObject().get("fields").getAsJsonObject();
-                        ReliefData item = new ReliefData();
+                        DisasterMetadata item = new DisasterMetadata();
                         String name = fields.get("name").getAsString();
                         String description = fields.get("description").getAsString();
                         JsonObject location = fields.get("primary_country").getAsJsonObject().get("location").getAsJsonObject();
                         Double longitude = location.get("lon").getAsDouble();
                         Double latitude = location.get("lat").getAsDouble();
 
-                        item.setName(name);
-                        item.setDescription(description);
-                        item.setLat(latitude);
-                        item.setLon(longitude);
+                        item.setTitle(name);
+                        item.setComment(description);
+                        item.setLatitude(latitude);
+                        item.setLongitude(longitude);
+                        item.setTags(new ArrayList<String>(){{
+                            add("Natural");
+                        }});
                         dataSet.add(item);
                     }
                     callback.onData(dataSet);
@@ -48,7 +52,7 @@ public class ReliefService {
 
 
     public interface ReliefCallback{
-        void onData(List<ReliefData> data);
+        void onData(List<DisasterMetadata> data);
     }
 
 }

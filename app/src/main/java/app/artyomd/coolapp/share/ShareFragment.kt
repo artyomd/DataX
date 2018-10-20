@@ -1,7 +1,6 @@
 package app.artyomd.coolapp.share
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -14,12 +13,11 @@ import app.artyomd.coolapp.R
 import app.artyomd.coolapp.db.DB
 import app.artyomd.coolapp.db.DisasterMetadata
 import com.squareup.picasso.Picasso
-import java.io.ByteArrayOutputStream
-import kotlin.collections.ArrayList
 import android.widget.Toast
 import okhttp3.RequestBody
 import okhttp3.MultipartBody
 import android.util.Log
+import android.widget.Button
 import android.widget.EditText
 import okhttp3.MediaType
 import retrofit2.Call
@@ -35,6 +33,8 @@ class ShareFragment : Fragment() {
     private var imageView: ImageView? = null
     private var db: DB? = null
     private var chosenFile: File? = null
+    private var commentEditText: EditText? = null
+    private var shareButton: Button? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_share, container, false)
@@ -43,27 +43,32 @@ class ShareFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val args = arguments
         db = DB.instance
+        commentEditText = view.findViewById(R.id.comment)
+        shareButton = view.findViewById(R.id.share_button)
         imageView = view.findViewById(R.id.share_image)
         imagePath = args!!.getString(CommonConstants.EXTRA_IMAGE_PATH)
-        Picasso.get().load(imagePath).into(imageView)
+        Picasso.get().load(File(imagePath)).into(imageView)
         val metadata = DisasterMetadata()
 
         metadata.id = UUID.randomUUID().toString()
-        metadata.latitude = args.getFloat(CommonConstants.EXTRA_IMAGE_LATITUDE)
-        metadata.longitude = args.getFloat(CommonConstants.EXTRA_IMAGE_LONGITUDE)
+        metadata.latitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LATITUDE)
+        metadata.longitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LONGITUDE)
         metadata.tags = args.getStringArrayList(CommonConstants.EXTRA_IMAGE_TAGS)
 
         chosenFile = File(imagePath)
-        upload(metadata)
+
+        shareButton!!.setOnClickListener { upload(metadata) }
 
         super.onViewCreated(view, savedInstanceState)
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(path: String) = ShareFragment().apply {
+        fun newInstance(path: String, latitude: Double, longitude: Double) = ShareFragment().apply {
             arguments = Bundle().apply {
                 putString(CommonConstants.EXTRA_IMAGE_PATH, path)
+                putDouble(CommonConstants.EXTRA_IMAGE_LATITUDE, latitude)
+                putDouble(CommonConstants.EXTRA_IMAGE_LONGITUDE, longitude)
             }
         }
     }
@@ -75,6 +80,10 @@ class ShareFragment : Fragment() {
             return
         }
 
+        var progressDialog = ProgressDialog(context)
+        progressDialog.setCancelable(false)
+        progressDialog.setTitle("Please wait")
+        progressDialog.show()
         val imgurService = ImgurService.retrofit.create(ImgurService::class.java)
 
         val call = imgurService.postImage(
@@ -98,7 +107,9 @@ class ShareFragment : Fragment() {
                         .show()
                     Log.d("URL Picture", "http://imgur.com/" + response.body()!!.data!!.id)
                     metadata.url = response.body()!!.data!!.link
+                    metadata.comment = commentEditText!!.text.toString()
                     db!!.uploadDisaster(metadata)
+                    progressDialog.dismiss()
                 }
             }
 

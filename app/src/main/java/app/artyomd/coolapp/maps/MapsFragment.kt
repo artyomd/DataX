@@ -8,15 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
-import app.artyomd.coolapp.api.ReliefData
+import app.artyomd.coolapp.db.DB
+import app.artyomd.coolapp.db.DisasterMetadata
 import app.artyomd.coolapp.api.ReliefService
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_maps.*
 
 
@@ -25,6 +26,7 @@ class MapsFragment : Fragment() {
 
 
     private lateinit var googleMap: GoogleMap
+    private var db: DB? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +37,21 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        db = DB.instance
+        db!!.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (data in dataSnapshot.children) {
+                    val metadata = data.getValue(DisasterMetadata::class.java)
+                    val marker = LatLng(metadata!!.latitude, metadata.longitude)
+                    googleMap.addMarker(MarkerOptions().position(marker))
+                }
+            }
+        })
+
         val mapFragment = (childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment)
         mapFragment.getMapAsync {
@@ -42,9 +59,9 @@ class MapsFragment : Fragment() {
 
             ReliefService.getData { data ->
                 data!!.forEach {
-                    val marker = LatLng(it.lat, it.lon)
+                    val marker = LatLng(it.latitude, it.longitude)
                     fab.post {
-                        googleMap.addMarker(MarkerOptions().position(marker).title(it.name))
+                        googleMap.addMarker(MarkerOptions().position(marker).title(it.title))
                     }
 
                 }

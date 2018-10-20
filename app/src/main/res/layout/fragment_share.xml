@@ -1,16 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".share.ShareFragment">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				xmlns:tools="http://schemas.android.com/tools"
+				android:orientation="vertical"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				tools:context=".share.ShareFragment">
 
-    <ImageView
+	<ImageView
 			android:id="@+id/share_image"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-			android:scaleType="centerCrop"
+			android:layout_width="match_parent"
+			android:layout_height="300dp"
 			android:padding="8dp"/>
 
+	<EditText
+			android:id="@+id/comment"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/share_image"
+			android:layout_marginTop="8dp"
+			android:hint="Comment (optional)"/>
 
-</FrameLayout>
+	<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_alignParentEnd="true"
+			android:text="Share"
+			android:id="@+id/share_button"/>
+
+
+</RelativeLayout>
