@@ -47,13 +47,13 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         buildLocationSettingsRequest()
     }
 
-    private fun openComponent(component: Component, path:String?) {
+    private fun openComponent(component: Component) {
         currentFragment =
-            when (component) {
-                Component.MAP -> MapsFragment()
-                Component.CAMERA -> CameraFragment()
-                Component.SHARE -> ShareFragment.newInstance(path!!)
-            }
+                when (component) {
+                    Component.MAP -> MapsFragment()
+                    Component.CAMERA -> CameraFragment()
+                    Component.SHARE -> ShareFragment()
+                }
         currentFragment!!.retainInstance = true
         val transaction = supportFragmentManager.beginTransaction()
             .replace(R.id.container, currentFragment!!)
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
     }
 
     override fun openCamera() {
-        openComponent(Component.CAMERA, null)
+        openComponent(Component.CAMERA)
     }
 
     override fun openShare(path: String) {
