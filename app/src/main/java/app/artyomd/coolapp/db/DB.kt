@@ -1,7 +1,6 @@
 package app.artyomd.coolapp.db
 
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 
 
 class DB private constructor() {
@@ -10,11 +9,16 @@ class DB private constructor() {
         reference!!.child(metadata.id!!).setValue(metadata)
     }
 
+    fun addValueEventListener(valueEventListener: ValueEventListener) {
+        reference!!.addValueEventListener(valueEventListener)
+    }
+
     companion object {
 
         private var db: DB? = null
         private var firebaseDatabase: FirebaseDatabase? = null
         private var reference: DatabaseReference? = null
+
 
         val instance: DB
             get() {
