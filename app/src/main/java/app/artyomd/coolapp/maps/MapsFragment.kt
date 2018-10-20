@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
+import app.artyomd.coolapp.api.ReliefData
+import app.artyomd.coolapp.api.ReliefService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -38,10 +40,16 @@ class MapsFragment : Fragment() {
         mapFragment.getMapAsync {
             googleMap = it
 
-            // Add a marker in Sydney and move the camera
-            val sydney = LatLng(-34.0, 151.0)
-            googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+            ReliefService.getData { data ->
+                data!!.forEach {
+                    val marker = LatLng(it.lat, it.lon)
+                    fab.post {
+                        googleMap.addMarker(MarkerOptions().position(marker).title(it.name))
+                    }
+
+                }
+            }
+            //googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
         }
 
         fab.setOnClickListener {
