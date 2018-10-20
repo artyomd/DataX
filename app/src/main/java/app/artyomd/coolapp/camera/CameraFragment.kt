@@ -25,6 +25,8 @@ class CameraFragment : Fragment() {
 
     private var cameraSource: CameraSource? = null
 
+    private val detector = CapturingDetector()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +47,13 @@ class CameraFragment : Fragment() {
         } else {
             requestCameraPermission()
         }
+
+        captureButton.setOnClickListener {
+            val bitmap = detector.getLastBitmap()
+            if (bitmap != null){
+
+            }
+        }
     }
 
     /**
@@ -53,21 +62,14 @@ class CameraFragment : Fragment() {
      * at long distances.
      */
     internal fun createCameraSource() {
-        cameraSource = CameraSource.Builder(context, CapturingDetector())
+        cameraSource = CameraSource.Builder(context, detector)
             .setRequestedPreviewSize(640, 480)
             .setFacing(CameraSource.CAMERA_FACING_BACK)
             .setRequestedFps(30.0f)
             .build()
     }
 
-    /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
-     */
     private fun requestCameraPermission() {
-        Log.w(TAG, "Camera permission is not granted. Requesting permission")
-
         val permissions = arrayOf(Manifest.permission.CAMERA)
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(
