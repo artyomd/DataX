@@ -21,6 +21,7 @@ import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
 import com.example.android.camera2basic.*
 import java.io.File
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -680,11 +681,12 @@ class CameraFragment : Fragment(), View.OnClickListener,
             )
             // After this, the camera will go back to the normal state of preview.
             state = STATE_PREVIEW
+
             captureSession?.setRepeatingRequest(
                 previewRequest, captureCallback,
                 backgroundHandler
             )
-        } catch (e: CameraAccessException) {
+        } catch (e: Exception) {
             Log.e(TAG, e.toString())
         }
 

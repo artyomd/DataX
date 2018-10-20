@@ -1,30 +1,34 @@
 package app.artyomd.coolapp.share
 
 import android.app.ProgressDialog
-import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.*
 import app.artyomd.coolapp.CommonConstants
 import app.artyomd.coolapp.R
+import app.artyomd.coolapp.api.ReliefService
 import app.artyomd.coolapp.db.DB
 import app.artyomd.coolapp.db.DisasterMetadata
+import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.squareup.picasso.Picasso
-import android.widget.Toast
-import okhttp3.RequestBody
-import okhttp3.MultipartBody
-import android.util.Log
-import android.widget.Button
-import android.widget.EditText
 import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
+import kotlin.math.max
 
 
 class ShareFragment : Fragment() {
@@ -35,6 +39,8 @@ class ShareFragment : Fragment() {
     private var chosenFile: File? = null
     private var commentEditText: EditText? = null
     private var shareButton: Button? = null
+
+    private lateinit var radioGroup: RadioGroup
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_share, container, false)
@@ -47,19 +53,71 @@ class ShareFragment : Fragment() {
         shareButton = view.findViewById(R.id.share_button)
         imageView = view.findViewById(R.id.share_image)
         imagePath = args!!.getString(CommonConstants.EXTRA_IMAGE_PATH)
+        radioGroup = view.findViewById(R.id.group)
+
         Picasso.get().load(File(imagePath)).into(imageView)
         val metadata = DisasterMetadata()
 
         metadata.id = UUID.randomUUID().toString()
         metadata.latitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LATITUDE)
         metadata.longitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LONGITUDE)
-        metadata.tags = args.getStringArrayList(CommonConstants.EXTRA_IMAGE_TAGS)
+        metadata.tag = args.getString(CommonConstants.EXTRA_IMAGE_TAGS)?:DisasterMetadata.TAG_OTHER
 
         chosenFile = File(imagePath)
+        val bitmap = downscaleImage(chosenFile!!)
+        runVision(bitmap)
 
         shareButton!!.setOnClickListener { upload(metadata) }
 
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun downscaleImage(file: File):Bitmap{
+        var bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val width = bitmap.width;
+        val height = bitmap.height
+        val maxSize = max(width, height)
+        if(maxSize > 500){
+            val scale = 500f/maxSize.toFloat()
+            val newHeght = scale*height
+            val newWidth = scale*width
+            bitmap = ReliefService.createResizedScaledBitmap(bitmap, newWidth.toInt(), newHeght.toInt(), null)
+            file.delete();
+            try {
+                FileOutputStream(file.absoluteFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        return bitmap
+    }
+
+    private fun runVision(bitmap: Bitmap){
+        val image = FirebaseVisionImage.fromBitmap(bitmap)
+
+
+        FirebaseVision.getInstance()
+            .visionLabelDetector.detectInImage(image)
+            .addOnSuccessListener { it ->
+                var conditatId:Int = R.id.other;
+                it.forEach{
+                    val string = it.label
+                    if(string.contains("fire")||string.contains("flame")){
+                        conditatId = R.id.fire;
+                    }else if(string.contains("Traffic Collision")){
+                        conditatId = R.id.carAccident
+                    }else if(string.contains("Waste")||string.contains("Litter")){
+                        conditatId = R.id.trash
+                    }
+                    radioGroup.check(conditatId)
+                }
+            }.addOnFailureListener{
+                it.printStackTrace()
+            }
+
+
     }
 
     companion object {
@@ -80,7 +138,16 @@ class ShareFragment : Fragment() {
             return
         }
 
-        var progressDialog = ProgressDialog(context)
+        val tag:String = when(radioGroup.checkedRadioButtonId){
+            R.id.fire->DisasterMetadata.TAG_FIRE
+            R.id.carAccident->DisasterMetadata.TAG_CAR
+            R.id.trash->DisasterMetadata.TAG_TRASH
+            else -> {
+                DisasterMetadata.TAG_OTHER
+            }
+        }
+        metadata.tag = tag
+        val progressDialog = ProgressDialog(context)
         progressDialog.setCancelable(false)
         progressDialog.setTitle("Please wait")
         progressDialog.show()
