@@ -27,6 +27,7 @@ public class ReliefService {
                     JsonArray data = object.getAsJsonObject().get("data").getAsJsonArray();
                     List<DisasterMetadata> dataSet = new ArrayList<>();
                     for(JsonElement element:data){
+                        String id = element.getAsJsonObject().get("id").getAsString();
                         JsonObject fields = element.getAsJsonObject().get("fields").getAsJsonObject();
                         DisasterMetadata item = new DisasterMetadata();
                         String name = fields.get("name").getAsString();
@@ -35,6 +36,7 @@ public class ReliefService {
                         Double longitude = location.get("lon").getAsDouble();
                         Double latitude = location.get("lat").getAsDouble();
 
+                        item.setId(id);
                         item.setTitle(name);
                         item.setComment(description);
                         item.setLatitude(latitude);

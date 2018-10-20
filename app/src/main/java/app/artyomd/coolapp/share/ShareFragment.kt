@@ -75,12 +75,12 @@ class ShareFragment : Fragment() {
 
     private fun upload(metadata: DisasterMetadata) {
         if (chosenFile == null) {
-            Toast.makeText(this@ShareFragment.context, "Choose a file before upload.", Toast.LENGTH_SHORT)
+            Toast.makeText(this@ShareFragment.context, "Something went wrong", Toast.LENGTH_SHORT)
                 .show()
             return
         }
 
-        var progressDialog = ProgressDialog(context)
+        val progressDialog = ProgressDialog(context)
         progressDialog.setCancelable(false)
         progressDialog.setTitle("Please wait")
         progressDialog.show()
@@ -103,8 +103,6 @@ class ShareFragment : Fragment() {
                     return
                 }
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ShareFragment.activity, "Upload successful !", Toast.LENGTH_SHORT)
-                        .show()
                     Log.d("URL Picture", "http://imgur.com/" + response.body()!!.data!!.id)
                     metadata.url = response.body()!!.data!!.link
                     metadata.comment = commentEditText!!.text.toString()

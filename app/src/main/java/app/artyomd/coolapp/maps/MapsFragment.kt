@@ -14,6 +14,7 @@ import app.artyomd.coolapp.api.ReliefService
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -27,6 +28,7 @@ class MapsFragment : Fragment() {
 
     private lateinit var googleMap: GoogleMap
     private var db: DB? = null
+    private lateinit var disasters: MutableList<DisasterMetadata>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +39,7 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        disasters = mutableListOf()
         db = DB.instance
         db!!.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
@@ -47,7 +50,8 @@ class MapsFragment : Fragment() {
                 for (data in dataSnapshot.children) {
                     val metadata = data.getValue(DisasterMetadata::class.java)
                     val marker = LatLng(metadata!!.latitude, metadata.longitude)
-                    googleMap.addMarker(MarkerOptions().position(marker))
+                    disasters.add(metadata)
+                    googleMap.addMarker(MarkerOptions().position(marker)).tag = metadata.id
                 }
             }
         })
@@ -61,12 +65,23 @@ class MapsFragment : Fragment() {
                 data!!.forEach {
                     val marker = LatLng(it.latitude, it.longitude)
                     fab.post {
-                        googleMap.addMarker(MarkerOptions().position(marker).title(it.title))
+                        googleMap.addMarker(MarkerOptions().position(marker)).tag = it.id
                     }
+                    disasters.add(it)
 
                 }
             }
-            //googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+            googleMap.setOnMarkerClickListener(GoogleMap.OnMarkerClickListener { marker ->
+                for (disaster in disasters) {
+                    if (marker.tag!! == disaster.id) {
+                        val dialog = MarkerDetailsDialog(context, disaster)
+                        dialog.show()
+                        return@OnMarkerClickListener true
+                    }
+                }
+                return@OnMarkerClickListener true
+            })
         }
 
         fab.setOnClickListener {
