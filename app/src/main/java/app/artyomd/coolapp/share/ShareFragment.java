@@ -46,4 +46,5 @@ public class ShareFragment extends Fragment {
         db.uploadDisaster(metadata);
         super.onViewCreated(view, savedInstanceState);
     }
+
 }

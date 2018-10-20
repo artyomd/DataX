@@ -35,29 +35,8 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         openComponent(Component.CAMERA)
     }
 
-    override fun openShare() {
+    override fun openShare(path:String) {
         openComponent(Component.SHARE)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode != CameraFragment.RC_HANDLE_CAMERA_PERM) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            return
-        }
-
-        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            // we have permission, so create the camerasource
-            (currentFragment as CameraFragment).createCameraSource()
-            return
-        }
-
-        val listener = DialogInterface.OnClickListener { _, _ -> finish() }
-
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Permission")
-            .setMessage(R.string.no_camera_permission)
-            .setPositiveButton(R.string.ok, listener)
-            .show()
     }
 
     companion object {

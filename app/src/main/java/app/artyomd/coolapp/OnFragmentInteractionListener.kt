@@ -2,5 +2,5 @@ package app.artyomd.coolapp
 
 interface OnFragmentInteractionListener {
     fun openCamera()
-    fun openShare()
+    fun openShare(path:String)
 }
