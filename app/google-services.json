@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "399857078803",
+    "firebase_url": "https://datax-61163.firebaseio.com",
+    "project_id": "datax-61163",
+    "storage_bucket": "datax-61163.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399857078803:android:622b3cba0cf3eabd",
+        "android_client_info": {
+          "package_name": "app.artyomd.coolapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399857078803-0am9ho1trqn14mkpvt8nu4m9s3q51qk7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsrBl_Nat-tEdesm_GSJSo0g07w5rIOk4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
