@@ -46,7 +46,7 @@ public class ReliefService {
                         item.setComment(description);
                         item.setLatitude(latitude);
                         item.setLongitude(longitude);
-                        item.setTag(DisasterMetadata.TAG_NATURAL);
+                        item.setTag(new ArrayList<String>(){{add(DisasterMetadata.TAG_NATURAL);}});
                         dataSet.add(item);
                     }
                     callback.onData(dataSet);
