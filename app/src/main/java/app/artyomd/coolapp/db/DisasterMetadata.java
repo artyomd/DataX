@@ -11,6 +11,14 @@ public class DisasterMetadata {
     private float latitude;
     private List<String> tags;
 
+    public DisasterMetadata(long id, Bitmap image, float longitude, float latitude, List<String> tags) {
+        this.id = id;
+        this.image = image;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.tags = tags;
+    }
+
     public DisasterMetadata() {
 
     }

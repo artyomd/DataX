@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import app.artyomd.coolapp.camera.CameraFragment
 import app.artyomd.coolapp.maps.MapsFragment
+import app.artyomd.coolapp.share.ShareFragment
 
 class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
     private var currentFragment: Fragment? = null
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
             when (component) {
                 Component.MAP -> MapsFragment()
                 Component.CAMERA -> CameraFragment()
+                Component.SHARE -> ShareFragment()
             }
         currentFragment!!.retainInstance = true
         val transaction = supportFragmentManager.beginTransaction()
@@ -33,6 +35,9 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         openComponent(Component.CAMERA)
     }
 
+    override fun openShare() {
+        openComponent(Component.SHARE)
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode != CameraFragment.RC_HANDLE_CAMERA_PERM) {
@@ -57,7 +62,7 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
 
     companion object {
         enum class Component {
-            MAP, CAMERA
+            MAP, CAMERA, SHARE
         }
     }
 }
