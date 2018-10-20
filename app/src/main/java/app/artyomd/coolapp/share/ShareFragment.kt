@@ -3,6 +3,7 @@ package app.artyomd.coolapp.share
 import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.ExifInterface
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -64,7 +65,8 @@ class ShareFragment : Fragment() {
         metadata.tag = args.getString(CommonConstants.EXTRA_IMAGE_TAGS)?:DisasterMetadata.TAG_OTHER
 
         chosenFile = File(imagePath)
-        val bitmap = downscaleImage(chosenFile!!)
+//        val bitmap = downscaleImage(chosenFile!!)
+        val bitmap = BitmapFactory.decodeFile(imagePath)
         runVision(bitmap)
 
         shareButton!!.setOnClickListener { upload(metadata) }
@@ -74,15 +76,16 @@ class ShareFragment : Fragment() {
 
     private fun downscaleImage(file: File):Bitmap{
         var bitmap = BitmapFactory.decodeFile(file.absolutePath)
-        val width = bitmap.width;
+        val width = bitmap.width
         val height = bitmap.height
         val maxSize = max(width, height)
+
         if(maxSize > 500){
             val scale = 500f/maxSize.toFloat()
-            val newHeght = scale*height
+            val newHeight = scale*height
             val newWidth = scale*width
-            bitmap = ReliefService.createResizedScaledBitmap(bitmap, newWidth.toInt(), newHeght.toInt(), null)
-            file.delete();
+            bitmap = ReliefService.createResizedScaledBitmap(bitmap, newWidth.toInt(), newHeight.toInt(), null)
+            file.delete()
             try {
                 FileOutputStream(file.absoluteFile).use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -90,8 +93,18 @@ class ShareFragment : Fragment() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+
         }
         return bitmap
+    }
+
+    private fun exifToDegrees(exifOrientation: Int): Int {
+        return when (exifOrientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
     }
 
     private fun runVision(bitmap: Bitmap){
@@ -101,11 +114,11 @@ class ShareFragment : Fragment() {
         FirebaseVision.getInstance()
             .visionLabelDetector.detectInImage(image)
             .addOnSuccessListener { it ->
-                var conditatId:Int = R.id.other;
+                var conditatId:Int = R.id.other
                 it.forEach{
                     val string = it.label
                     if(string.contains("fire")||string.contains("flame")){
-                        conditatId = R.id.fire;
+                        conditatId = R.id.fire
                     }else if(string.contains("Traffic Collision")){
                         conditatId = R.id.carAccident
                     }else if(string.contains("Waste")||string.contains("Litter")){
@@ -159,7 +172,7 @@ class ShareFragment : Fragment() {
             MultipartBody.Part.createFormData(
                 "image",
                 chosenFile!!.name,
-                RequestBody.create(MediaType.parse("image/*"), chosenFile)
+                RequestBody.create(MediaType.parse("image/*"), chosenFile!!)
             )
         )
 

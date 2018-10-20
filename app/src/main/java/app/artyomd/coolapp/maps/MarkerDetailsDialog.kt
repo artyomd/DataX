@@ -24,11 +24,11 @@ class MarkerDetailsDialog(context: Context, metadata: DisasterMetadata) : Dialog
 
         if (!TextUtils.isEmpty(metadata!!.url)) {
             imageView.visibility = View.VISIBLE
+            Picasso.get().load(metadata!!.url).into(imageView)
         }
-        if (TextUtils.isEmpty(metadata!!.title)) {
-            title.visibility = View.GONE
+        if (!TextUtils.isEmpty(metadata!!.title)) {
+            title.visibility = View.VISIBLE
         }
-        Picasso.get().load(metadata!!.url).into(imageView)
         commentTextView.text = metadata!!.comment
         title.text = metadata!!.title
     }
