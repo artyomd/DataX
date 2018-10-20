@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -18,6 +20,7 @@ import kotlinx.android.synthetic.main.fragment_maps.*
 
 class MapsFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
+
 
     private lateinit var googleMap: GoogleMap
 
