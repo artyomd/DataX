@@ -13,6 +13,6 @@ class DisasterMetadata {
     var url: String? = null
     var longitude: Double = 0.toDouble()
     var latitude: Double = 0.toDouble()
-    var tag: String = TAG_OTHER
+    var tag: List<String>? = null
     var comment: String? = null
 }

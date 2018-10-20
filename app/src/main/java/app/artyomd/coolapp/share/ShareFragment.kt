@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -39,8 +40,8 @@ class ShareFragment : Fragment() {
     private var chosenFile: File? = null
     private var commentEditText: EditText? = null
     private var shareButton: Button? = null
-
-    private lateinit var radioGroup: RadioGroup
+    private lateinit var recyclerView: RecyclerView
+    private val tagAdapter = TagAdapter();
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_share, container, false)
@@ -53,7 +54,9 @@ class ShareFragment : Fragment() {
         shareButton = view.findViewById(R.id.share_button)
         imageView = view.findViewById(R.id.share_image)
         imagePath = args!!.getString(CommonConstants.EXTRA_IMAGE_PATH)
-        radioGroup = view.findViewById(R.id.group)
+
+        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.adapter = tagAdapter
 
         Picasso.get().load(File(imagePath)).into(imageView)
         val metadata = DisasterMetadata()
@@ -61,7 +64,7 @@ class ShareFragment : Fragment() {
         metadata.id = UUID.randomUUID().toString()
         metadata.latitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LATITUDE)
         metadata.longitude = args.getDouble(CommonConstants.EXTRA_IMAGE_LONGITUDE)
-        metadata.tag = args.getString(CommonConstants.EXTRA_IMAGE_TAGS)?:DisasterMetadata.TAG_OTHER
+        metadata.tag = args.getStringArrayList(CommonConstants.EXTRA_IMAGE_TAGS)
 
         chosenFile = File(imagePath)
         val bitmap = downscaleImage(chosenFile!!)
@@ -96,22 +99,16 @@ class ShareFragment : Fragment() {
 
     private fun runVision(bitmap: Bitmap){
         val image = FirebaseVisionImage.fromBitmap(bitmap)
-
-
         FirebaseVision.getInstance()
             .visionLabelDetector.detectInImage(image)
             .addOnSuccessListener { it ->
-                var conditatId:Int = R.id.other;
+                val list = mutableListOf<String>()
                 it.forEach{
                     val string = it.label
-                    if(string.contains("fire")||string.contains("flame")){
-                        conditatId = R.id.fire;
-                    }else if(string.contains("Traffic Collision")){
-                        conditatId = R.id.carAccident
-                    }else if(string.contains("Waste")||string.contains("Litter")){
-                        conditatId = R.id.trash
+                    if(!(string == "fire" || string == "trash" || string == "car accident")){
+                        list.add(string)
                     }
-                    radioGroup.check(conditatId)
+                    tagAdapter.addSudgestions(list)
                 }
             }.addOnFailureListener{
                 it.printStackTrace()
@@ -138,15 +135,7 @@ class ShareFragment : Fragment() {
             return
         }
 
-        val tag:String = when(radioGroup.checkedRadioButtonId){
-            R.id.fire->DisasterMetadata.TAG_FIRE
-            R.id.carAccident->DisasterMetadata.TAG_CAR
-            R.id.trash->DisasterMetadata.TAG_TRASH
-            else -> {
-                DisasterMetadata.TAG_OTHER
-            }
-        }
-        metadata.tag = tag
+        metadata.tag = tagAdapter.getSeltectd()
         val progressDialog = ProgressDialog(context)
         progressDialog.setCancelable(false)
         progressDialog.setTitle("Please wait")
