@@ -26,6 +26,11 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 
 class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
+    override fun getCurrentLocation(): Location {
+        return mCurrentLocation!!
+    }
+
+
     private var currentFragment: Fragment? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +113,6 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
                 mCurrentLocation = locationResult!!.lastLocation
-                //TODO
             }
 
             override fun onLocationAvailability(p0: LocationAvailability?) {
