@@ -1,8 +1,5 @@
 package app.artyomd.coolapp
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
@@ -15,15 +12,15 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        openComponent(Component.MAP)
+        openComponent(Component.MAP, null)
     }
 
-    private fun openComponent(component: Component) {
+    private fun openComponent(component: Component, path:String?) {
         currentFragment =
             when (component) {
                 Component.MAP -> MapsFragment()
                 Component.CAMERA -> CameraFragment()
-                Component.SHARE -> ShareFragment()
+                Component.SHARE -> ShareFragment.newInstance(path!!)
             }
         currentFragment!!.retainInstance = true
         val transaction = supportFragmentManager.beginTransaction()
@@ -32,11 +29,11 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
     }
 
     override fun openCamera() {
-        openComponent(Component.CAMERA)
+        openComponent(Component.CAMERA, null)
     }
 
     override fun openShare(path:String) {
-        openComponent(Component.SHARE)
+        openComponent(Component.SHARE, path)
     }
 
     companion object {
