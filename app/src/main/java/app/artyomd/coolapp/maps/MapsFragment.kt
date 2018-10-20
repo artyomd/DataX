@@ -58,7 +58,7 @@ class MapsFragment : Fragment() {
 
         val mapFragment = (childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment)
-        mapFragment.getMapAsync {
+        mapFragment.getMapAsync { it ->
             googleMap = it
 
             ReliefService.getData { data ->

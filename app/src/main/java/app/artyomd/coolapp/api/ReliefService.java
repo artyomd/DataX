@@ -1,5 +1,10 @@
 package app.artyomd.coolapp.api;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.support.annotation.Nullable;
 import app.artyomd.coolapp.db.DisasterMetadata;
 import com.google.gson.*;
 import okhttp3.*;
@@ -41,9 +46,7 @@ public class ReliefService {
                         item.setComment(description);
                         item.setLatitude(latitude);
                         item.setLongitude(longitude);
-                        item.setTags(new ArrayList<String>(){{
-                            add("Natural");
-                        }});
+                        item.setTag(DisasterMetadata.TAG_NATURAL);
                         dataSet.add(item);
                     }
                     callback.onData(dataSet);
@@ -55,6 +58,22 @@ public class ReliefService {
 
     public interface ReliefCallback{
         void onData(List<DisasterMetadata> data);
+    }
+
+    public static Bitmap createResizedScaledBitmap(Bitmap old, int width, int height, @Nullable Bitmap.Config config) {
+        if (config == null) {
+            config = old.getConfig();
+        }
+        Bitmap newBitmap = Bitmap.createBitmap(width, height, config);
+        Canvas canvas = new Canvas(newBitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setDither(true);
+        paint.setFilterBitmap(true);
+        Rect sourceRect = new Rect(0, 0, old.getWidth(), old.getHeight());
+        Rect destRect = new Rect(0, 0, width, height);
+        canvas.drawBitmap(old, sourceRect, destRect, paint);
+        return newBitmap;
     }
 
 }
