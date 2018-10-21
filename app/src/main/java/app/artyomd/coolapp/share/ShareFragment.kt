@@ -3,6 +3,7 @@ package app.artyomd.coolapp.share
 import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.ExifInterface
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -70,7 +71,8 @@ class ShareFragment : Fragment() {
         metadata.tag = args.getStringArrayList(CommonConstants.EXTRA_IMAGE_TAGS)
 
         chosenFile = File(imagePath)
-        val bitmap = downscaleImage(chosenFile!!)
+//        val bitmap = downscaleImage(chosenFile!!)
+        val bitmap = BitmapFactory.decodeFile(imagePath)
         runVision(bitmap)
 
         shareButton!!.setOnClickListener { upload(metadata) }
@@ -80,15 +82,16 @@ class ShareFragment : Fragment() {
 
     private fun downscaleImage(file: File):Bitmap{
         var bitmap = BitmapFactory.decodeFile(file.absolutePath)
-        val width = bitmap.width;
+        val width = bitmap.width
         val height = bitmap.height
         val maxSize = max(width, height)
+
         if(maxSize > 500){
             val scale = 500f/maxSize.toFloat()
-            val newHeght = scale*height
+            val newHeight = scale*height
             val newWidth = scale*width
-            bitmap = ReliefService.createResizedScaledBitmap(bitmap, newWidth.toInt(), newHeght.toInt(), null)
-            file.delete();
+            bitmap = ReliefService.createResizedScaledBitmap(bitmap, newWidth.toInt(), newHeight.toInt(), null)
+            file.delete()
             try {
                 FileOutputStream(file.absoluteFile).use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -96,8 +99,18 @@ class ShareFragment : Fragment() {
             } catch (e: IOException) {
                 e.printStackTrace()
             }
+
         }
         return bitmap
+    }
+
+    private fun exifToDegrees(exifOrientation: Int): Int {
+        return when (exifOrientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
     }
 
     private fun runVision(bitmap: Bitmap){
@@ -134,7 +147,7 @@ class ShareFragment : Fragment() {
 
     private fun upload(metadata: DisasterMetadata) {
         if (chosenFile == null) {
-            Toast.makeText(this@ShareFragment.context, "Choose a file before upload.", Toast.LENGTH_SHORT)
+            Toast.makeText(this@ShareFragment.context, "Something went wrong", Toast.LENGTH_SHORT)
                 .show()
             return
         }
@@ -152,7 +165,7 @@ class ShareFragment : Fragment() {
             MultipartBody.Part.createFormData(
                 "image",
                 chosenFile!!.name,
-                RequestBody.create(MediaType.parse("image/*"), chosenFile)
+                RequestBody.create(MediaType.parse("image/*"), chosenFile!!)
             )
         )
 
@@ -163,8 +176,6 @@ class ShareFragment : Fragment() {
                     return
                 }
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ShareFragment.activity, "Upload successful !", Toast.LENGTH_SHORT)
-                        .show()
                     Log.d("URL Picture", "http://imgur.com/" + response.body()!!.data!!.id)
                     metadata.url = response.body()!!.data!!.link
                     metadata.comment = commentEditText!!.text.toString()
