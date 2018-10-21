@@ -38,13 +38,15 @@ class TagAdapter: RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
        val string = tagList[position]
         holder.textView.text = string
-        holder.checkBox.setOnCheckedChangeListener { _, _ -> {
-            if(holder.checkBox.isChecked){
-                listChecked.add(holder.textView.text.toString())
-            }else{
-                listChecked.remove(holder.textView.text.toString())
+        holder.checkBox.setOnCheckedChangeListener { _, _ ->
+            run {
+                if (holder.checkBox.isChecked) {
+                    listChecked.add(holder.textView.text.toString())
+                } else {
+                    listChecked.remove(holder.textView.text.toString())
+                }
             }
-        } }
+        }
     }
 
     class TagViewHolder(view:View):RecyclerView.ViewHolder(view){

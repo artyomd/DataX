@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import app.artyomd.coolapp.db.DB
 import app.artyomd.coolapp.db.DisasterMetadata
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetectorOptions
 import com.squareup.picasso.Picasso
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -56,6 +58,7 @@ class ShareFragment : Fragment() {
         imagePath = args!!.getString(CommonConstants.EXTRA_IMAGE_PATH)
 
         recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = tagAdapter
 
         Picasso.get().load(File(imagePath)).into(imageView)
@@ -99,13 +102,14 @@ class ShareFragment : Fragment() {
 
     private fun runVision(bitmap: Bitmap){
         val image = FirebaseVisionImage.fromBitmap(bitmap)
-        FirebaseVision.getInstance()
-            .visionLabelDetector.detectInImage(image)
+        val options = FirebaseVisionLabelDetectorOptions.Builder().setConfidenceThreshold(0.8f).build();
+            FirebaseVision.getInstance()
+            .getVisionLabelDetector(options).detectInImage(image)
             .addOnSuccessListener { it ->
                 val list = mutableListOf<String>()
                 it.forEach{
                     val string = it.label
-                    if(!(string == "fire" || string == "trash" || string == "car accident")){
+                    if(!(string == "fire" || string == "trash" || string == "car accident") && !list.contains(string)){
                         list.add(string)
                     }
                     tagAdapter.addSudgestions(list)
