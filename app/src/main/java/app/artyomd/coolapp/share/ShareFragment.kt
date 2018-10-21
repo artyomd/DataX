@@ -1,6 +1,7 @@
 package app.artyomd.coolapp.share
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
@@ -14,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import app.artyomd.coolapp.CommonConstants
+import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
 import app.artyomd.coolapp.api.ReliefService
 import app.artyomd.coolapp.db.DB
@@ -31,6 +33,7 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.lang.NullPointerException
 import java.util.*
 import kotlin.math.max
 
@@ -145,6 +148,16 @@ class ShareFragment : Fragment() {
         }
     }
 
+    private lateinit var fragmentInteractionListener: OnFragmentInteractionListener
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if(context is OnFragmentInteractionListener){
+            fragmentInteractionListener = context
+        }else{
+            throw  NullPointerException()
+        }
+    }
+
     private fun upload(metadata: DisasterMetadata) {
         if (chosenFile == null) {
             Toast.makeText(this@ShareFragment.context, "Something went wrong", Toast.LENGTH_SHORT)
@@ -181,6 +194,7 @@ class ShareFragment : Fragment() {
                     metadata.comment = commentEditText!!.text.toString()
                     db!!.uploadDisaster(metadata)
                     progressDialog.dismiss()
+                    fragmentInteractionListener.openMaps()
                 }
             }
 
