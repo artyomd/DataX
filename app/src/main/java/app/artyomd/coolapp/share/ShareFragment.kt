@@ -122,7 +122,7 @@ class ShareFragment : Fragment() {
                 val list = mutableListOf<String>()
                 it.forEach{
                     val string = it.label
-                    if(!(string == "fire" || string == "trash" || string == "car accident") && !list.contains(string)){
+                    if(!(string == DisasterMetadata.TAG_FIRE || string == DisasterMetadata.TAG_TRASH || string == DisasterMetadata.TAG_CAR) || list.contains(string)){
                         list.add(string)
                     }
                     tagAdapter.addSudgestions(list)
