@@ -13,7 +13,6 @@ import app.artyomd.coolapp.R
 import app.artyomd.coolapp.api.ReliefService
 import app.artyomd.coolapp.db.DB
 import app.artyomd.coolapp.db.DisasterMetadata
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -70,7 +69,7 @@ class MapsFragment : Fragment() {
             .findFragmentById(R.id.map) as SupportMapFragment)
         mapFragment.getMapAsync { it ->
             googleMap = it
-            googleMap.isMyLocationEnabled = truegi
+            googleMap.isMyLocationEnabled = true
 
             ReliefService.getData { data ->
                 data!!.forEach {
