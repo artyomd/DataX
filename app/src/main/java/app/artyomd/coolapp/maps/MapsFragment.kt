@@ -70,7 +70,7 @@ class MapsFragment : Fragment() {
             .findFragmentById(R.id.map) as SupportMapFragment)
         mapFragment.getMapAsync { it ->
             googleMap = it
-            googleMap.isMyLocationEnabled = truegi
+            googleMap.isMyLocationEnabled = true
 
             ReliefService.getData { data ->
                 data!!.forEach {
