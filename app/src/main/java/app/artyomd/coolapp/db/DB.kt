@@ -1,6 +1,8 @@
 package app.artyomd.coolapp.db
 
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class DB private constructor() {
@@ -10,7 +12,7 @@ class DB private constructor() {
     }
 
     fun addValueEventListener(valueEventListener: ValueEventListener) {
-        reference!!.addValueEventListener(valueEventListener)
+        reference!!.addListenerForSingleValueEvent(valueEventListener)
     }
 
     companion object {

@@ -1,6 +1,8 @@
 package app.artyomd.coolapp.maps
 
 import android.content.Context
+import android.graphics.*
+import android.graphics.Paint.FILTER_BITMAP_FLAG
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -8,13 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import app.artyomd.coolapp.OnFragmentInteractionListener
 import app.artyomd.coolapp.R
+import app.artyomd.coolapp.api.ReliefService
 import app.artyomd.coolapp.db.DB
 import app.artyomd.coolapp.db.DisasterMetadata
-import app.artyomd.coolapp.api.ReliefService
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -51,7 +53,14 @@ class MapsFragment : Fragment() {
                     val metadata = data.getValue(DisasterMetadata::class.java)
                     val marker = LatLng(metadata!!.latitude, metadata.longitude)
                     disasters.add(metadata)
-                    googleMap.addMarker(MarkerOptions().position(marker)).tag = metadata.id
+                    var bitmap = getMarker(metadata.tag!!)
+
+                    if (bitmap == null) {
+                        googleMap.addMarker(MarkerOptions().position(marker)).tag = metadata.id
+                    } else {
+                        bitmap = scaleBitmap(bitmap, 100, 100)
+                        googleMap.addMarker(MarkerOptions().position(marker).icon(BitmapDescriptorFactory.fromBitmap(bitmap))).tag = metadata.id
+                    }
                 }
             }
         })
@@ -65,7 +74,14 @@ class MapsFragment : Fragment() {
                 data!!.forEach {
                     val marker = LatLng(it.latitude, it.longitude)
                     fab.post {
-                        googleMap.addMarker(MarkerOptions().position(marker)).tag = it.id
+                        var bitmap = getMarker(it.tag!!)
+
+                        if (bitmap == null) {
+                            googleMap.addMarker(MarkerOptions().position(marker)).tag = it.id
+                        } else {
+                            bitmap = scaleBitmap(bitmap!!, 100, 100)
+                            googleMap.addMarker(MarkerOptions().position(marker).icon(BitmapDescriptorFactory.fromBitmap(bitmap))).tag = it.id
+                        }
                     }
                     disasters.add(it)
 
@@ -87,6 +103,34 @@ class MapsFragment : Fragment() {
         fab.setOnClickListener {
             listener?.openCamera()
         }
+    }
+
+    fun getMarker(tags: List<String>): Bitmap? {
+        return when {
+            tags.contains(DisasterMetadata.TAG_FIRE) -> BitmapFactory.decodeResource(resources, R.drawable.fire)
+            tags.contains(DisasterMetadata.TAG_CAR) -> BitmapFactory.decodeResource(resources, R.drawable.car)
+            tags.contains(DisasterMetadata.TAG_TRASH) -> BitmapFactory.decodeResource(resources, R.drawable.trash)
+            tags.contains(DisasterMetadata.TAG_NATURAL) -> BitmapFactory.decodeResource(resources, R.drawable.natural)
+            else -> null
+        }
+    }
+
+    fun scaleBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap {
+        val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+
+        val scaleX = newWidth / bitmap.width.toFloat()
+        val scaleY = newHeight / bitmap.height.toFloat()
+        val pivotX = 0f
+        val pivotY = 0f
+
+        val scaleMatrix = Matrix()
+        scaleMatrix.setScale(scaleX, scaleY, pivotX, pivotY)
+
+        val canvas = Canvas(scaledBitmap)
+        canvas.matrix = scaleMatrix
+        canvas.drawBitmap(bitmap, 0f, 0f, Paint(FILTER_BITMAP_FLAG))
+
+        return scaledBitmap
     }
 
     override fun onAttach(context: Context) {
