@@ -60,6 +60,10 @@ class MainActivity : AppCompatActivity(), OnFragmentInteractionListener {
         transaction.commit()
     }
 
+    override fun openMaps() {
+        openComponent(Component.MAP, null)
+    }
+
     override fun openCamera() {
         openComponent(Component.CAMERA, null)
     }

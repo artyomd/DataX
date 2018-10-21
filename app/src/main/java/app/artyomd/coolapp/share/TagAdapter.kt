@@ -17,14 +17,24 @@ class TagAdapter : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
     )
 
     fun getSeltectd(): List<String> {
+        if(listChecked.isEmpty()){
+            listChecked.add(DisasterMetadata.TAG_OTHER)
+        }
         return listChecked
     }
 
+    private var added:Boolean = false
+
+    @Synchronized
     public fun addSudgestions(list: List<String>) {
+        if(added){
+            return
+        }
         tagList.remove(DisasterMetadata.TAG_OTHER)
         tagList.addAll(list)
         tagList.add(DisasterMetadata.TAG_OTHER)
         notifyDataSetChanged()
+        added = true
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): TagViewHolder {
